@@ -1,35 +1,43 @@
-# Viikkotehtävä 1 Domain + kotlin-harjoitukset + ensimmäinen Compose-näkymä 
+# Viikkotehtävä 1 & Viikkotehtävä 2 – Kotlin Compose ja ViewModel
+
+Tämä projekti on Viikkotehtävä 2, joka on laajennus Viikkotehtävä 1 -tehtävästä
+
+## Mitä sovellus tekee
+- pystyt lisätä tehtävän
+- pystyt poistaa tehtävän
+- pystytjärjestää tehtävät päivämäärän mukaan
+- pystyt näyttää tehdyt ja tekemättömät tehtävät erikseen painikkeilla
+- Tehtävän voi merkitä tehdyksi ruksilla
+
+## compose tilanhallinnan
+Compose-tilanhallinta tarkoittaa, että käyttöliittymä seuraa sovelluksen tilaa.
+Tässä projektissa tehtävälista seuraa tehtävien lisäämistä ja poistamista
+sekä muita muutoksia.
+Tehtävälista on tallennettu ViewModeliin state-muuttujana, ja kun data muuttuu,
+Compose-käyttöliittymä päivittyy automaattisesti.
 
 
-## Kuvaus
-Tässä harjoituksessa harjoitellaan Kotlinin perusteita Android-sovelluksessa. 
-Tehtävässä toteutettiin Task-datamalli, mock-data, puhtaita Kotlin-funktioita sekä 
-ensimmäinen Jetpack Compose -käyttöliittymä, joka näyttää tehtävälistan.
+## Miksi käytin ViewModel eikä remember
+remember:  on tarkoitettu lyhytikäiseen tilaan.
+Se sopii esimerkiksi tekstikenttään, jossa käyttäjä kirjoittaa tekstiä.
+Kun painetaan esimerkiksi Add-painiketta tai näkymä päivitetään,
+tieto voi kadota.
 
-## Datamalli
-Sovelluksessa käytetään Task-datamallia, joka sisältää seuraavat kentät:
-- id
-- title
-- description
-- priority
-- dueDate
-- done
-
-Tehtävistä on luotu mock-dataa (mockTasks), jota käytetään sovelluksessa feikkinä tietokantana.
-
-## Kotlin-funktiot
-Projektissa käytetään seuraavia funktioita tehtävälistan käsittelyyn:
-- addTask(list, task) :  lisää uuden tehtävän listaan
-- toggleDone(list, id) : vaihtaa tehtävän tilan true tai false id:n perusteella
-- filterByDone(list, done): näyttää vain valmiit tai keskeneräiset tehtävät
-- sortByDueDate(list):  järjestää tehtävät eräpäivän mukaan
-
-## käyttöliittymä
-- Käyttöliittymä on toteutettu Jetpack Composella, ja HomeScreen näyttää tehtävälistan mock-datan avulla.
-- Tehtävät esitetään Card-komponenteissa ja lista on toteutettu LazyColumn illa, jotta näkymä on selkeä ja vieritettävä.
+ViewModelia : käytetään tärkeämmän ja pidempään säilyvän datan tallentamiseen.
+Esimerkiksi näytön käännöksissä tieto ei katoa, koska ViewModel säilyy.
 
 
 
+## funktiot
+Projektissa käytetään seuraavia funktioita tehtävälistan käsittelyyn
+TaskViewModelin kautta
+- addTask
+- toggleDone
+- filterByDone
+- sortByDueDate
+- removeTask
+- showAll
+- 
 ## Projektin testaminen
 Projekti voidaan testa Android Studiossa normaalisti Run-toiminnolla
 Android-emulaattorissa tai fyysisessä laitteessa.

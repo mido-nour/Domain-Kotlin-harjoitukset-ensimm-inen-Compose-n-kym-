@@ -1,121 +1,126 @@
 package com.example.myapplication.ui
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.myapplication.domain.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.domain.Priority
+import com.example.myapplication.domain.Task
+import com.example.myapplication.viewModel.TaskViewModel
 
 @Composable
-fun HomeScreen(tasks: List<Task>, modifier: Modifier = Modifier) {
+fun HomeScreen(vm: TaskViewModel = viewModel()) {
 
-    var currentTasks by remember { mutableStateOf(tasks) }
+    var newTitle by remember { mutableStateOf("") }
 
-    var doneFilter by remember { mutableStateOf<Boolean?>(null) }
-
-    val visibleTasks = remember(currentTasks, doneFilter) {
-        when (doneFilter) {
-            null -> currentTasks
-            true -> filterByDone(currentTasks, true)
-            false -> filterByDone(currentTasks, false)
-        }
-    }
-
-    val newTask = Task(
-        id = (currentTasks.maxOfOrNull { it.id } ?: 0) + 1,
-        title = "New Task",
-        description = "Added from button",
-        priority = Priority.LOW,
-        dueDate = "2026-01-20",
-        done = false
-    )
-
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
 
-        item {
-            Text(
-                text = "My Gym Plan",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
+        Text(
+            text = "Tasks (${vm.tasks.size})",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = newTitle,
+                onValueChange = { newTitle = it },
+                modifier = Modifier.weight(1f),
+                label = { Text("New task") },
+                singleLine = true
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(onClick = {
-                    currentTasks = addTask(currentTasks, newTask)
-                }) {
-                    Text("Add")
-                }
+            Spacer(modifier = Modifier.width(8.dp))
 
-                Button(onClick = {
-                    val firstId = currentTasks.firstOrNull()?.id ?: return@Button
-                    currentTasks = toggleDone(currentTasks, firstId)
-                }) {
-                    Text("Toggle")
+            Button(onClick = {
+                val title = newTitle.trim()
+                if (title.isNotEmpty()) {
+                    vm.addTask(
+                        Task(
+                            id = (vm.tasks.maxOfOrNull { it.id } ?: 0) + 1,
+                            title = title,
+                            description = "",
+                            priority = Priority.LOW,
+                            dueDate = "2026-01-20",
+                            done = false
+                        )
+                    )
+                    newTitle = ""
                 }
-
-                Button(onClick = {
-                    currentTasks = sortByDueDate(currentTasks)
-                }) {
-                    Text("Sort")
-                }
+            }) {
+                Text("Add")
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(onClick = { doneFilter = null }) { Text("All") }
-                Button(onClick = { doneFilter = true }) { Text("Done") }
-                Button(onClick = { doneFilter = false }) { Text("Not done") }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
 
-        items(visibleTasks) { task ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .border(
-                        width = 1.dp,
-                        color = Color.LightGray,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = task.title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(text = task.description)
-                    Text(text = "Priority: ${task.priority}")
-                    Text(text = "Status: ${if (task.done) "Done" else "Not done"}")
-                    Text(text = "Due: ${task.dueDate}")
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(onClick = { vm.sortByDueDate() }) {
+                Text("Sort")
+            }
+            OutlinedButton(onClick = { vm.showAll() }) {
+                Text("All")
+            }
+            OutlinedButton(onClick = { vm.filterByDone(true) }) {
+                Text("Done")
+            }
+            OutlinedButton(onClick = { vm.filterByDone(false) }) {
+                Text("Not done")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(vm.tasks) { task ->
+                Card {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = task.done,
+                            onCheckedChange = { vm.toggleDone(task.id) }
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = task.title)
+                            Text(
+                                text = task.dueDate,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        TextButton(onClick = { vm.removeTask(task.id) }) {
+                            Text("Delete")
+                        }
+                    }
                 }
             }
         }
     }
 }
+
