@@ -1,6 +1,4 @@
-package com.example.myapplication.domain
-
-
+package com.example.myapplication.model
 
 data class Task(
     val id: Int,

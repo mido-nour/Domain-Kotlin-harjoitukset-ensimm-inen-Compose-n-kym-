@@ -1,8 +1,7 @@
-package com.example.myapplication.domain
+package com.example.myapplication.model
 
-enum class Priority {
-    HIGH, MEDIUM, LOW
-}
+
+
 
 val mockTasks: List<Task> = listOf(
     Task(

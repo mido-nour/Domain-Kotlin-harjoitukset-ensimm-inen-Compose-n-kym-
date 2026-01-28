@@ -1,45 +1,58 @@
-# Viikkotehtävä 1 & Viikkotehtävä 2 – Kotlin Compose ja ViewModel
+# Viikkotehtävä 3 – MVVM-arkkitehtuuri käytännössä
 
-Tämä projekti on Viikkotehtävä 2, joka on laajennus Viikkotehtävä 1 -tehtävästä
+Tämä projekti on Viikkotehtävä 3, joka on laajennus Viikkotehtävä 2 -tehtävästä.  
+Tehtävässä käytetään MVVM-arkkitehtuuria Jetpack Compose -sovelluksessa.
 
 ## Mitä sovellus tekee
-- pystyt lisätä tehtävän
-- pystyt poistaa tehtävän
-- pystytjärjestää tehtävät päivämäärän mukaan
-- pystyt näyttää tehdyt ja tekemättömät tehtävät erikseen painikkeilla
-- Tehtävän voi merkitä tehdyksi ruksilla
+- käyttäjä voi lisätä tehtävän
+- käyttäjä voi poistaa tehtävän
+- tehtävät voi järjestää päivämäärän mukaan
+- tehtäviä voi näyttää erikseen (Done / Not done)
+- tehtävän voi merkitä tehdyksi valintaruudulla
+- tehtävää voi muokata dialogissa (otsikko, kuvaus, deadline ja prioriteetti)
 
-## compose tilanhallinnan
-Compose-tilanhallinta tarkoittaa, että käyttöliittymä seuraa sovelluksen tilaa.
-Tässä projektissa tehtävälista seuraa tehtävien lisäämistä ja poistamista
-sekä muita muutoksia.
-Tehtävälista on tallennettu ViewModeliin state-muuttujana, ja kun data muuttuu,
-Compose-käyttöliittymä päivittyy automaattisesti.
+## MVVM – miksi se on hyödyllinen Compose-sovelluksissa
 
+MVVM-arkkitehtuurin tarkoitus on selkeyttää sovellusta ja tehdä koodista
+helpompi ymmärtää, testata ja ylläpitää.
 
-## Miksi käytin ViewModel eikä remember
-remember:  on tarkoitettu lyhytikäiseen tilaan.
-Se sopii esimerkiksi tekstikenttään, jossa käyttäjä kirjoittaa tekstiä.
-Kun painetaan esimerkiksi Add-painiketta tai näkymä päivitetään,
-tieto voi kadota.
+### Model
+Model sisältää sovelluksen datan.  
+Tässä projektissa Model on `Task`-luokka, joka sisältää tehtävän tiedot,
+kuten otsikon, kuvauksen, deadlinen ja prioriteetin.
 
-ViewModelia : käytetään tärkeämmän ja pidempään säilyvän datan tallentamiseen.
-Esimerkiksi näytön käännöksissä tieto ei katoa, koska ViewModel säilyy.
+### View
+View sisältää käyttöliittymän.  
+Tässä projektissa View on Jetpack Compose -näkymä, kuten `HomeScreen`.
 
+View:
+- näyttää tehtävälistan
+- reagoi käyttäjän painalluksiin
 
+### ViewModel
+ViewModel hoitaa sovelluksen logiikan ja tilan.  
+Tässä projektissa `TaskViewModel`:
+- säilyttää tehtävälistan
+- lisää, poistaa ja muokkaa tehtäviä
+- hallitsee tehtävien tilaa StateFlow’n avulla
 
-## funktiot
+## Miten StateFlow toimii
+StateFlow on tapa hallita sovelluksen tilaa ViewModelissa.
+Kun data muuttuu (esimerkiksi tehtävä lisätään, poistetaan tai muokataan),
+Jetpack Compose päivittää käyttöliittymän automaattisesti
+`collectAsState()`-funktion avulla.
+
+## Funktiot
 Projektissa käytetään seuraavia funktioita tehtävälistan käsittelyyn
-TaskViewModelin kautta
+TaskViewModelin kautta:
 - addTask
 - toggleDone
 - filterByDone
 - sortByDueDate
 - removeTask
 - showAll
-- 
-## Projektin testaminen
-Projekti voidaan testa Android Studiossa normaalisti Run-toiminnolla
-Android-emulaattorissa tai fyysisessä laitteessa.
+- updateTask
 
-
+## Projektin testaaminen
+Projekti voidaan testata Android Studiossa normaalisti Run-toiminnolla
+Android-emulaattorissa tai fyysisessä Android-laitteessa.
