@@ -1,46 +1,69 @@
-# Viikkotehtävä 3 – MVVM-arkkitehtuuri käytännössä
+# Viikkotehtävä 4 – Navigointi ja MVVM käytännössä
 
-Tämä projekti on Viikkotehtävä 3, joka on laajennus Viikkotehtävä 2 -tehtävästä.  
-Tehtävässä käytetään MVVM-arkkitehtuuria Jetpack Compose -sovelluksessa.
+Tämä projekti on Viikkotehtävä 4, joka on laajennus Viikkotehtävä 3 -tehtävästä.  
+Tehtävässä käytetään MVVM-arkkitehtuuria ja Jetpack Compose -navigointia.
 
 ## Mitä sovellus tekee
-- käyttäjä voi lisätä tehtävän
+- käyttäjä voi lisätä tehtävän dialogin avulla
 - käyttäjä voi poistaa tehtävän
+- käyttäjä voi muokata tehtävää dialogissa
+- tehtävät voi merkitä tehdyiksi
 - tehtävät voi järjestää päivämäärän mukaan
-- tehtäviä voi näyttää erikseen (Done / Not done)
-- tehtävän voi merkitä tehdyksi valintaruudulla
-- tehtävää voi muokata dialogissa (otsikko, kuvaus, deadline ja prioriteetti)
+- tehtävät näkyvät kalenterimaisessa näkymässä (CalendarScreen)
+- sovelluksessa on kolme sivua: Home, Calendar ja Settings
+- käyttäjä voi vaihtaa sivujen välillä navigaation avulla
+- Settings-näkymä sisältää sovelluksen perustiedot
 
-## MVVM – miksi se on hyödyllinen Compose-sovelluksissa
+## Mitä tarkoittaa navigointi Jetpack Composessa
+Navigointi Jetpack Composessa tarkoittaa siirtymistä eri sivujen välillä 
+yhden activityn sisällä composable-näkymien avulla.
 
-MVVM-arkkitehtuurin tarkoitus on selkeyttää sovellusta ja tehdä koodista
-helpompi ymmärtää, testata ja ylläpitää.
 
-### Model
-Model sisältää sovelluksen datan.  
-Tässä projektissa Model on `Task`-luokka, joka sisältää tehtävän tiedot,
-kuten otsikon, kuvauksen, deadlinen ja prioriteetin.
+## Mitä ovat NavHost ja NavController
+NavControlleria käytetään sivujen vaihtamiseen sovelluksessa.
+Tässä projektissa sitä käytetään siirtymiseen esimerkiksi HomeScreeniltä CalendarScreenille.
+NavHost näyttää sen näkymän, joka on tällä hetkellä aktiivinen.
+Kun käyttäjä valitsee jonkin sivun, NavController vaihtaa näkymän ja NavHost näyttää valitun sivun.
 
-### View
-View sisältää käyttöliittymän.  
-Tässä projektissa View on Jetpack Compose -näkymä, kuten `HomeScreen`.
 
-View:
-- näyttää tehtävälistan
-- reagoi käyttäjän painalluksiin
+## Miten sovelluksesi navigaatiorakenne on toteutettu (Home ↔ Calendar).
 
-### ViewModel
-ViewModel hoitaa sovelluksen logiikan ja tilan.  
-Tässä projektissa `TaskViewModel`:
-- säilyttää tehtävälistan
-- lisää, poistaa ja muokkaa tehtäviä
-- hallitsee tehtävien tilaa StateFlow’n avulla
+Sovelluksessa on kolme nappia alavalikossa.
+Niiden tarkoitus on, että käyttäjä voi vaihtaa sivujen välillä.
+Sovelluksessa on kolme sivua Home, Calendar ja Settings.
+Kun käyttäjä painaa jotakin nappia, sovellus vaihtaa sivua NavControllerin avulla.
+NavController huolehtii sivujen vaihtamisesta näkymästä toiseen.
 
-## Miten StateFlow toimii
-StateFlow on tapa hallita sovelluksen tilaa ViewModelissa.
-Kun data muuttuu (esimerkiksi tehtävä lisätään, poistetaan tai muokataan),
-Jetpack Compose päivittää käyttöliittymän automaattisesti
-`collectAsState()`-funktion avulla.
+
+
+## 1) Miten MVVM ja navigointi yhdistyvät (yksi ViewModel kahdelle screenille)  
+## 2)  Miten ViewModelin tila jaetaan kummankin ruudun välillä.
+Tässä sovelluksessa käytetään MVVM-arkkitehtuuria (Model, ViewModel, View).
+Sama ViewModel on käytössä kaikissa näkymissä, kuten HomeScreenissä ja CalendarScreenissä.
+
+Kun tehtävää muokataan yhdessä näkymässä, muutos näkyy heti myös toisessa näkymässä.
+Sovelluksessa käytetään StateFlow’ta tilan hallintaan, joten kun tehtäviä lisätään tai muokataan, 
+käyttöliittymä päivittyy automaattisesti.
+
+
+## Miten CalendarScreen on toteutettu (miten tehtävät ryhmitellään / esitetään kalenterimaisesti).
+CalendarScreen on toteutettu siten, että kaikki tehtävät ryhmitellään päivämäärän mukaan.
+Tehtävät järjestellään dueDate-päivän perusteella.
+Jokainen päivämäärä näytetään otsikkona, ja sen alla näkyvät kyseisen päivän tehtävät.
+Tehtävästä näytetään otsikko, kuvaus ja prioriteetti (low, medium tai high)
+Näin käyttäjä näkee helposti, mille päivälle tehtävä kuuluu ja mitä tehtäviä on tulossa.
+
+## Miten AlertDialog hoitaa addTask ja editTask.
+
+Olen käyttänyt AlertDialogia, koska se on parempi ratkaisu kuin uusi näyttö.
+Sen avulla käyttäjä voi lisätä uuden tehtävän ilman, että näkymää tarvitsee vaihtaa.
+Kun käyttäjä lisää tehtävän dialogissa, tiedot lähetetään ViewModeliin, joka luo tehtävälle uuden id:n 
+ja tallentaa sen listaan.
+
+Muokkaustilanteessa, kun käyttäjä painaa tehtävää, avautuu dialogi, jossa vanhat tiedot näkyvät valmiiksi.
+Käyttäjä voi muokata tietoja ja tallentaa muutokset ilman, että hänen tarvitsee siirtyä uuteen näkymään.
+Näin sovellus pysyy selkeänä ja helppokäyttöisenä.
+
 
 ## Funktiot
 Projektissa käytetään seuraavia funktioita tehtävälistan käsittelyyn
