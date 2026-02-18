@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.model.Priority
 import com.example.myapplication.model.Task
 import com.example.myapplication.viewmodel.TaskViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
-    viewModel: TaskViewModel
-) {
+fun HomeScreen(viewModel: TaskViewModel) {
+
     val tasks by viewModel.tasks.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -31,6 +31,7 @@ fun HomeScreen(
             }
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,7 +61,7 @@ fun HomeScreen(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(tasks) { task ->
+                items(tasks, key = { it.id }) { task ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -96,6 +97,7 @@ fun HomeScreen(
             }
         }
     }
+
     if (showAddDialog) {
         TaskEditDialog(
             task = Task(
@@ -108,15 +110,13 @@ fun HomeScreen(
             ),
             onCancel = { showAddDialog = false },
             onSave = { newTask ->
-                val nextId = (tasks.maxOfOrNull { it.id } ?: 0) + 1
-                viewModel.addTask(newTask.copy(id = nextId))
+                viewModel.addTask(newTask.copy(id = 0))
                 showAddDialog = false
             },
-            onDelete = {
-                showAddDialog = false
-            }
+            onDelete = { showAddDialog = false }
         )
     }
+
     editingTask?.let { task ->
         TaskEditDialog(
             task = task,

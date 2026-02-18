@@ -22,16 +22,20 @@ fun TaskEditDialog(
     var priority by remember(task.id) { mutableStateOf(task.priority) }
     var priorityMenuOpen by remember { mutableStateOf(false) }
 
+    val canSave = title.trim().isNotEmpty()
+
     AlertDialog(
         onDismissRequest = onCancel,
         title = { Text(if (task.id == 0) "Add Task" else "Edit Task") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
 
                 OutlinedTextField(
@@ -45,7 +49,8 @@ fun TaskEditDialog(
                     value = dueDate,
                     onValueChange = { dueDate = it },
                     label = { Text("Due date (YYYY-MM-DD)") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
 
                 ExposedDropdownMenuBox(
@@ -57,7 +62,9 @@ fun TaskEditDialog(
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Priority") },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
                     )
 
                     ExposedDropdownMenu(
@@ -78,16 +85,21 @@ fun TaskEditDialog(
             }
         },
         confirmButton = {
-            Button(onClick = {
-                if (title.trim().isNotEmpty()) {
-                    onSave(task.copy(
-                        title = title.trim(),
-                        description = description.trim(),
-                        dueDate = dueDate.trim(),
-                        priority = priority
-                    ))
-                }
-            }) {
+            Button(
+                onClick = {
+                    onSave(
+                        task.copy(
+                            title = title.trim(),
+                            description = description.trim(),
+                            dueDate = dueDate.trim(),
+                            priority = priority,
+
+                            done = if (task.id == 0) false else task.done
+                        )
+                    )
+                },
+                enabled = canSave
+            ) {
                 Text("Save")
             }
         },

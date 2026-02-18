@@ -18,8 +18,9 @@ fun CalendarScreen(vm: TaskViewModel) {
 
     var editingTask by remember { mutableStateOf<Task?>(null) }
 
-
-    val groupedTasks = tasks.sortedBy { it.dueDate }.groupBy { it.dueDate }
+    val groupedTasks = remember(tasks) {
+        tasks.sortedBy { it.dueDate }.groupBy { it.dueDate }
+    }
 
     Column(
         modifier = Modifier

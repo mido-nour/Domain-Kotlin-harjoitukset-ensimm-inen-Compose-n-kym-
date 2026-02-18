@@ -1,7 +1,7 @@
-# Viikkotehtävä 4 – Navigointi ja MVVM käytännössä
+# Viikkotehtävä 6 – Room
 
-Tämä projekti on Viikkotehtävä 4, joka on laajennus Viikkotehtävä 3 -tehtävästä.  
-Tehtävässä käytetään MVVM-arkkitehtuuria ja Jetpack Compose -navigointia.
+Tämä projekti on Viikkotehtävä 6, joka on laajennus Viikkotehtävä 4 -tehtävästä.  
+Tässä tehtävässä lisättiin Room-tietokanta, jotta tehtävät tallentuvat pysyvästi puhelimeen.
 
 ## Mitä sovellus tekee
 - käyttäjä voi lisätä tehtävän dialogin avulla
@@ -9,65 +9,54 @@ Tehtävässä käytetään MVVM-arkkitehtuuria ja Jetpack Compose -navigointia.
 - käyttäjä voi muokata tehtävää dialogissa
 - tehtävät voi merkitä tehdyiksi
 - tehtävät voi järjestää päivämäärän mukaan
+- tehtävät tallentuvat pysyvästi Room-tietokantaan
 - tehtävät näkyvät kalenterimaisessa näkymässä (CalendarScreen)
 - sovelluksessa on kolme sivua: Home, Calendar ja Settings
 - käyttäjä voi vaihtaa sivujen välillä navigaation avulla
 - Settings-näkymä sisältää sovelluksen perustiedot
 
-## Mitä tarkoittaa navigointi Jetpack Composessa
-Navigointi Jetpack Composessa tarkoittaa siirtymistä eri sivujen välillä 
-yhden activityn sisällä composable-näkymien avulla.
+## Mitä Room tekee (Entity–DAO–Database–Repository–ViewModel–UI)
 
+Room on Androidin tietokantakirjasto, joka tallentaa datan pysyvästi laitteen sisään.  
+Ennen Roomin käyttöä data oli vain väliaikaisessa muistissa, eikä se säilynyt sovelluksen sulkemisen jälkeen.
 
-## Mitä ovat NavHost ja NavController
-NavControlleria käytetään sivujen vaihtamiseen sovelluksessa.
-Tässä projektissa sitä käytetään siirtymiseen esimerkiksi HomeScreeniltä CalendarScreenille.
-NavHost näyttää sen näkymän, joka on tällä hetkellä aktiivinen.
-Kun käyttäjä valitsee jonkin sivun, NavController vaihtaa näkymän ja NavHost näyttää valitun sivun.
+Entity määrittelee tietokannan taulun rakenteen. Tässä projektissa TaskEntity kuvaa yhtä tehtävää tietokannassa
 
+DAO sisältää tietokantaan liittyvät funktiot, kuten lukeminen, lisääminen, muokkaaminen ja poistaminen.
 
-## Miten sovelluksesi navigaatiorakenne on toteutettu (Home ↔ Calendar).
+Database on varsinainen Room-tietokanta, joka luodaan sovellukseen ja antaa pääsyn DAO:hon.
 
-Sovelluksessa on kolme nappia alavalikossa.
-Niiden tarkoitus on, että käyttäjä voi vaihtaa sivujen välillä.
-Sovelluksessa on kolme sivua Home, Calendar ja Settings.
-Kun käyttäjä painaa jotakin nappia, sovellus vaihtaa sivua NavControllerin avulla.
-NavController huolehtii sivujen vaihtamisesta näkymästä toiseen.
+Repository toimii välikerroksena ViewModelin ja Roomin välillä.
 
+ViewModel hakee datan Repositoryltä ja tarjoaa sen käyttöliittymälle.
 
+UI: näyttää datan käyttäjälle ja päivittyy automaattisesti, kun tietokanta muuttuu.
 
-## 1) Miten MVVM ja navigointi yhdistyvät (yksi ViewModel kahdelle screenille)  
-## 2)  Miten ViewModelin tila jaetaan kummankin ruudun välillä.
-Tässä sovelluksessa käytetään MVVM-arkkitehtuuria (Model, ViewModel, View).
-Sama ViewModel on käytössä kaikissa näkymissä, kuten HomeScreenissä ja CalendarScreenissä.
+## Projektin rakenne
 
-Kun tehtävää muokataan yhdessä näkymässä, muutos näkyy heti myös toisessa näkymässä.
-Sovelluksessa käytetään StateFlow’ta tilan hallintaan, joten kun tehtäviä lisätään tai muokataan, 
-käyttöliittymä päivittyy automaattisesti.
+Projektissa käytetään MVVM-arkkitehtuuria ja Room-tietokantaa.
 
+Projektin rakenne on seuraava:
 
-## Miten CalendarScreen on toteutettu (miten tehtävät ryhmitellään / esitetään kalenterimaisesti).
-CalendarScreen on toteutettu siten, että kaikki tehtävät ryhmitellään päivämäärän mukaan.
-Tehtävät järjestellään dueDate-päivän perusteella.
-Jokainen päivämäärä näytetään otsikkona, ja sen alla näkyvät kyseisen päivän tehtävät.
-Tehtävästä näytetään otsikko, kuvaus ja prioriteetti (low, medium tai high)
-Näin käyttäjä näkee helposti, mille päivälle tehtävä kuuluu ja mitä tehtäviä on tulossa.
+- data/model → sisältää TaskEntity-tiedoston
+- data/local → sisältää TaskDao ja AppDatabase
+- data/repository → sisältää TaskRepository
+- viewmodel → sisältää TaskViewModel
+- view → sisältää HomeScreen, CalendarScreen ja muut käyttöliittymän tiedostot
 
-## Miten AlertDialog hoitaa addTask ja editTask.
+Tämä rakenne erottaa käyttöliittymän, logiikan ja tietokannan toisistaan selkeästi.
 
-Olen käyttänyt AlertDialogia, koska se on parempi ratkaisu kuin uusi näyttö.
-Sen avulla käyttäjä voi lisätä uuden tehtävän ilman, että näkymää tarvitsee vaihtaa.
-Kun käyttäjä lisää tehtävän dialogissa, tiedot lähetetään ViewModeliin, joka luo tehtävälle uuden id:n 
-ja tallentaa sen listaan.
+## Miten datavirta kulkee
 
-Muokkaustilanteessa, kun käyttäjä painaa tehtävää, avautuu dialogi, jossa vanhat tiedot näkyvät valmiiksi.
-Käyttäjä voi muokata tietoja ja tallentaa muutokset ilman, että hänen tarvitsee siirtyä uuteen näkymään.
-Näin sovellus pysyy selkeänä ja helppokäyttöisenä.
-
+Kun käyttäjä lisää, muokkaa tai poistaa tehtävän, käyttöliittymä (UI) kutsuu ViewModelia.  
+ViewModel lähettää pyynnön Repositorylle.  
+Repository tallentaa tai hakee datan Room-tietokannasta DAO:n avulla.  
+Room palauttaa datan Flow’n kautta ViewModelille.  
+Tämän jälkeen ViewModel lähettää datan takaisin käyttöliittymälle, ja UI päivittyy automaattisesti.
 
 ## Funktiot
-Projektissa käytetään seuraavia funktioita tehtävälistan käsittelyyn
-TaskViewModelin kautta:
+
+Projektissa käytetään seuraavia funktioita TaskViewModelin kautta:
 - addTask
 - toggleDone
 - filterByDone
@@ -77,5 +66,7 @@ TaskViewModelin kautta:
 - updateTask
 
 ## Projektin testaaminen
-Projekti voidaan testata Android Studiossa normaalisti Run-toiminnolla
-Android-emulaattorissa tai fyysisessä Android-laitteessa.
+
+Projekti voidaan testata Android Studiossa normaalisti Run-toiminnolla  
+Android-emulaattorissa tai fyysisellä Android-laitteella.
+

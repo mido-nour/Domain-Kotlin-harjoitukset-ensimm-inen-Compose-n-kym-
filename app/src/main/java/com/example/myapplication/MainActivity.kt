@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -13,26 +14,36 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.data.local.AppDatabase
+import com.example.myapplication.data.repository.TaskRepository
 import com.example.myapplication.view.CalendarScreen
 import com.example.myapplication.view.HomeScreen
-import com.example.myapplication.view.SettingsScreen
 import com.example.myapplication.view.Routes
+import com.example.myapplication.view.SettingsScreen
 import com.example.myapplication.viewmodel.TaskViewModel
+import com.example.myapplication.viewmodel.TaskViewModelFactory
 
 class MainActivity : ComponentActivity() {
+
+    private val database by lazy { AppDatabase.getDatabase(applicationContext) }
+    private val repository by lazy { TaskRepository(database.taskDao()) }
+
+    private val vm: TaskViewModel by viewModels {
+        TaskViewModelFactory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    MainApp()
+                    MainApp(vm = vm)
                 }
             }
         }
@@ -40,10 +51,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainApp() {
+fun MainApp(vm: TaskViewModel) {
     val navController = rememberNavController()
-
-    val vm: TaskViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -77,7 +86,6 @@ fun MainApp() {
                     }
                 )
 
-
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
                     label = { Text("Settings") },
@@ -98,15 +106,9 @@ fun MainApp() {
                 navController = navController,
                 startDestination = Routes.HOME
             ) {
-                composable(Routes.HOME) {
-                    HomeScreen(vm)
-                }
-                composable(Routes.CALENDAR) {
-                    CalendarScreen(vm)
-                }
-                composable(Routes.SETTINGS) {
-                    SettingsScreen()
-                }
+                composable(Routes.HOME) { HomeScreen(vm) }
+                composable(Routes.CALENDAR) { CalendarScreen(vm) }
+                composable(Routes.SETTINGS) { SettingsScreen() }
             }
         }
     }
